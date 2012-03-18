@@ -12,6 +12,10 @@ public class Pathfinder {
     MapBlock lastBlock;
     MapBlock openBlock;
     
+    private static final int VISIT_LEFT = 0;
+    private static final int VISIT_CENTER = 1;
+    private static final int VISIT_RIGHT = 2;
+    
     float diagDist = (float)Math.sqrt(2.0f);
     
     public Pathfinder()
@@ -38,62 +42,65 @@ public class Pathfinder {
     public void spreadPath(MapBlock curBlock, Map map)
     {
         openBlock = openBlock.nextDistBlock;
-        MapBlock testBlock = openBlock;
-        while(testBlock != null)
-        {
-            testBlock = testBlock.nextDistBlock;
-        }
         if(curBlock.position.x == 0)
-        {
-            if(curBlock.position.y > 0)
-            {
-                visitBlock(curBlock, false, map.blocks[curBlock.position.x][curBlock.position.y - 1]);
-                visitBlock(curBlock, true, map.blocks[curBlock.position.x + 1][curBlock.position.y - 1]);
-            }
-
-            visitBlock(curBlock, false, map.blocks[curBlock.position.x + 1][curBlock.position.y]);
-                
-            if(curBlock.position.y < map.height - 1)
-            {
-                visitBlock(curBlock, false, map.blocks[curBlock.position.x][curBlock.position.y + 1]);
-                visitBlock(curBlock, true, map.blocks[curBlock.position.x + 1][curBlock.position.y + 1]);
-            }
-        }
+            visitBlockLeft(curBlock, map);
         else if(curBlock.position.x == map.width - 1)
-        {
-            if(curBlock.position.y > 0)
-            {
-                visitBlock(curBlock, false, map.blocks[curBlock.position.x][curBlock.position.y - 1]);
-                visitBlock(curBlock, true, map.blocks[curBlock.position.x - 1][curBlock.position.y - 1]);
-            }
-
-            visitBlock(curBlock, false, map.blocks[curBlock.position.x - 1][curBlock.position.y]);
-                
-            if(curBlock.position.y < map.height - 1)
-            {
-                visitBlock(curBlock, false, map.blocks[curBlock.position.x][curBlock.position.y + 1]);
-                visitBlock(curBlock, true, map.blocks[curBlock.position.x - 1][curBlock.position.y + 1]);
-            }
-        }
+            visitBlockRight(curBlock, map);
         else
-        {
-            if(curBlock.position.y > 0)
-            {
-                visitBlock(curBlock, true, map.blocks[curBlock.position.x - 1][curBlock.position.y - 1]);
-                visitBlock(curBlock, false, map.blocks[curBlock.position.x][curBlock.position.y - 1]);
-                visitBlock(curBlock, true, map.blocks[curBlock.position.x + 1][curBlock.position.y - 1]);
-            }
-
+            visitBlockCenter(curBlock, map);
+    }
+    
+    private void visitBlockLeft(MapBlock curBlock, Map map)
+    {
+        if(curBlock.position.y > 0)
+            visitBlockTop(curBlock, map, VISIT_LEFT);
+        visitBlockMiddle(curBlock, map, VISIT_LEFT);
+        if(curBlock.position.y < map.height - 1)
+            visitBlockBottom(curBlock, map, VISIT_LEFT);
+    }
+    
+    private void visitBlockRight(MapBlock curBlock, Map map)
+    {
+        if(curBlock.position.y > 0)
+            visitBlockTop(curBlock, map, VISIT_RIGHT);
+        visitBlockMiddle(curBlock, map, VISIT_RIGHT);
+        if(curBlock.position.y < map.height - 1)
+            visitBlockBottom(curBlock, map, VISIT_RIGHT);
+    }
+    
+    private void visitBlockCenter(MapBlock curBlock, Map map)
+    {
+        if(curBlock.position.y > 0)
+            visitBlockTop(curBlock, map, VISIT_CENTER);
+        visitBlockMiddle(curBlock, map, VISIT_CENTER);
+        if(curBlock.position.y < map.height - 1)
+            visitBlockBottom(curBlock, map, VISIT_CENTER);
+    }
+    
+    private void visitBlockTop(MapBlock curBlock, Map map, int leftCenterRight)
+    {
+        if(!(leftCenterRight == VISIT_LEFT))
+            visitBlock(curBlock, true, map.blocks[curBlock.position.x - 1][curBlock.position.y - 1]);
+        visitBlock(curBlock, false, map.blocks[curBlock.position.x][curBlock.position.y - 1]);
+        if(!(leftCenterRight == VISIT_RIGHT))
+            visitBlock(curBlock, true, map.blocks[curBlock.position.x + 1][curBlock.position.y - 1]);
+    }
+    
+    private void visitBlockMiddle(MapBlock curBlock, Map map, int leftCenterRight)
+    {
+        if(!(leftCenterRight == VISIT_LEFT))
             visitBlock(curBlock, false, map.blocks[curBlock.position.x - 1][curBlock.position.y]);
+        if(!(leftCenterRight == VISIT_RIGHT))
             visitBlock(curBlock, false, map.blocks[curBlock.position.x + 1][curBlock.position.y]);
-                
-            if(curBlock.position.y < map.height - 1)
-            {
-                visitBlock(curBlock, true, map.blocks[curBlock.position.x - 1][curBlock.position.y + 1]);
-                visitBlock(curBlock, false, map.blocks[curBlock.position.x][curBlock.position.y + 1]);
-                visitBlock(curBlock, true, map.blocks[curBlock.position.x + 1][curBlock.position.y + 1]);
-            }
-        }
+    }
+    
+    private void visitBlockBottom(MapBlock curBlock, Map map, int leftCenterRight)
+    {
+        if(!(leftCenterRight == VISIT_LEFT))
+            visitBlock(curBlock, true, map.blocks[curBlock.position.x - 1][curBlock.position.y + 1]);
+        visitBlock(curBlock, false, map.blocks[curBlock.position.x][curBlock.position.y + 1]);
+        if(!(leftCenterRight == VISIT_RIGHT))
+            visitBlock(curBlock, true, map.blocks[curBlock.position.x + 1][curBlock.position.y + 1]);
     }
     
     public void setFirstLastBlocks()
@@ -171,8 +178,7 @@ public class Pathfinder {
         MapBlock prevBlock = null;
         MapBlock nextBlock = openBlock;
         boolean continueSearch = true;
-        while(nextBlock != null && continueSearch)
-        {
+        while(nextBlock != null && continueSearch){
             if(curBlock.possibleTrip < nextBlock.possibleTrip)
                 continueSearch = false;
             else
@@ -181,10 +187,8 @@ public class Pathfinder {
                 nextBlock = nextBlock.nextDistBlock;
             }
         }
-        if(prevBlock == null)
-            openBlock = curBlock;
-        else
-            prevBlock.nextDistBlock = curBlock;
+        if(prevBlock == null) openBlock = curBlock;
+        else prevBlock.nextDistBlock = curBlock;
         curBlock.nextDistBlock = nextBlock;
     }
     
