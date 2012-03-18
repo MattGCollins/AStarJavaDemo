@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package astarjava;
 
 import java.awt.Point;
@@ -130,18 +126,9 @@ public class Pathfinder {
             Point vectorTo = new Point(curBlock.position.x - lastBlock.position.x, curBlock.position.y - lastBlock.position.y);
             vectorTo.x = Math.abs(vectorTo.x);
             vectorTo.y = Math.abs(vectorTo.y);
-            /*System.out.print(vectorTo.x);
-            System.out.print(", ");
-            System.out.print(vectorTo.y);
-            System.out.print("; ");*/
             float possibleDiagonals = Math.min(vectorTo.x, vectorTo.y);
             float extraSteps = Math.max(vectorTo.x, vectorTo.y) - possibleDiagonals;
             float distanceTo = (possibleDiagonals * diagDist) + extraSteps;
-            /*System.out.print(possibleDiagonals);
-            System.out.print(", ");
-            System.out.print(extraSteps);
-            System.out.print(", ");
-            System.out.println(distanceTo);*/
             curBlock.possibleTrip = curBlock.distance + distanceTo;
             if(curBlock.terrainType != MapBlock.TER_WATER)
             {

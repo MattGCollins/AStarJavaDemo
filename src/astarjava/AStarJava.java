@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package astarjava;
 
 import java.io.BufferedReader;
@@ -13,9 +9,6 @@ import java.io.InputStreamReader;
  */
 public class AStarJava {
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
         
         Map map = new Map(10, 10);

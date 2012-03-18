@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package astarjava;
 
 import java.io.BufferedReader;
@@ -110,9 +106,6 @@ public class Questioner {
 
         String returnString = null;
         
-
-        //  read the username from the command-line; need to use try/catch with the
-        //  readLine() method
         try {
             returnString = br.readLine();
         } catch (IOException ioe) {
