@@ -28,84 +28,62 @@ public class Questioner {
     
     public void questionUser()
     {
-        String tempString;
-        do
-        {
-            System.out.print("Create another map? (y/n) ");
-            tempString = getLine();
-            tempString.toLowerCase();
-        }
-        while(!tempString.equals("y") && !tempString.equals("n"));
         
-        again = false;
-        if(tempString.equals("y"))
-            again = true;
+        again = getYN("Create another map?");
         
         if(again)
+            getMapInfo();
+    }
+    
+    private void getMapInfo()
+    {
+        height = getNumberBetween(3, 100, "Enter height (3-100): ");
+        width = getNumberBetween(3, 100, "Enter width (3-100): ");
+        forestChance = getNumberBetween(0, 100, "Enter forest spawn % (0-100): ");
+        mountainChance = getNumberBetween(0, 100, "Enter mountain spawn % (0-100): ");
+        waterChance = getNumberBetween(0, 100, "Enter water spawn % (0-100): ");
+    }
+    
+    private boolean getYN(String prompt)
+    {
+        String tempString; boolean returnBoolean = false;
+        do
         {
-            do
-            {
-                System.out.print("Enter height (3-100): ");
-                tempString = getLine();
-                try {
-                    height = Integer.parseInt(tempString);
-                } catch (NumberFormatException ioe) {
-                    height = -1;
-                }
-            }while(height < 3 || height > 100);
-            
-            do
-            {
-                System.out.print("Enter width (3-100): ");
-                tempString = getLine();
-                try {
-                    width = Integer.parseInt(tempString);
-                } catch (NumberFormatException ioe) {
-                    width = -1;
-                }
-            }while(width < 3 || width > 100);
-            
-            do
-            {
-                System.out.print("Enter forest spawn % (0-100): ");
-                tempString = getLine();
-                try {
-                    forestChance = Integer.parseInt(tempString);
-                } catch (NumberFormatException ioe) {
-                    forestChance = -1;
-                }
-            }while(forestChance < 0 || forestChance > 100);
-            
-            do
-            {
-                System.out.print("Enter mountain spawn % (0-100): ");
-                tempString = getLine();
-                try {
-                    mountainChance = Integer.parseInt(tempString);
-                } catch (NumberFormatException ioe) {
-                    mountainChance = -1;
-                }
-            }while(mountainChance < 0 || mountainChance > 100);
-            
-            do
-            {
-                System.out.print("Enter water spawn % (0-100): ");
-                tempString = getLine();
-                try {
-                    waterChance = Integer.parseInt(tempString);
-                } catch (NumberFormatException ioe) {
-                    waterChance = -1;
-                }
-            }while(waterChance < 0 || waterChance > 100);
+            System.out.print(prompt + " (y/n): ");
+            tempString = getLine();
+            tempString.toLowerCase();
+        }while(!tempString.equals("y") && !tempString.equals("n"));
+        if(tempString.equals("y")) {returnBoolean = true;}
+        return returnBoolean;
+    }
+    
+    private int getNumberBetween(int min, int max, String prompt)
+    {
+        int returnInt;
+        do
+        {
+            System.out.print(prompt);
+            returnInt = getInt();
+        }while(returnInt < min || returnInt > max);
+        return returnInt;
+    }
+    
+    private int getInt()
+    {
+        String tempString = getLine();
+        int returnInt;
+        try {
+            returnInt = Integer.parseInt(tempString);
+        } catch (NumberFormatException ioe) {
+            returnInt = -1;
         }
+        return returnInt;
     }
     
     private String getLine()
     {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
         String returnString = null;
-        
         try {
             returnString = br.readLine();
         } catch (IOException ioe) {
