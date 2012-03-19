@@ -126,8 +126,7 @@ public class Pathfinder {
     
     public void visitBlock(MapBlock prevBlock, boolean diagonal, MapBlock curBlock)
     {
-        float distance = (diagonal ? (curBlock.terrainType + prevBlock.terrainType) * diagDist : curBlock.terrainType + prevBlock.terrainType);
-        distance = prevBlock.distance + (distance / 2);
+        float distance = findDistance(prevBlock, diagonal, curBlock);
         if(curBlock.visited == false || distance < curBlock.distance){
             curBlock.prevPathBlock = prevBlock;
             curBlock.distance = distance;
@@ -140,6 +139,14 @@ public class Pathfinder {
             }
             curBlock.visited = true;
         }
+    }
+    
+    private float findDistance(MapBlock prevBlock, boolean diagonal, MapBlock curBlock)
+    {
+        float returnDistance = (diagonal ? (curBlock.terrainType + prevBlock.terrainType)* diagDist
+                : curBlock.terrainType + prevBlock.terrainType);
+        returnDistance = prevBlock.distance + (returnDistance / 2);
+        return returnDistance;
     }
     
     private float findPossibleTrip(MapBlock curBlock)
@@ -155,41 +162,50 @@ public class Pathfinder {
     
     public void removeBlock(MapBlock curBlock)
     {
+        MapBlock prevBlock = searchBlock(curBlock);
+        MapBlock checkBlock;
+        if(prevBlock == null) checkBlock = openBlock;
+        else checkBlock = prevBlock.nextDistBlock;
+        removeBlockHere(curBlock, prevBlock, checkBlock);
+    }
+    
+    private MapBlock searchBlock(MapBlock curBlock)
+    {
         MapBlock prevBlock = null;
-        MapBlock nextBlock = openBlock;
+        MapBlock checkBlock = openBlock;
         boolean continueSearch = true;
-        while(nextBlock != null && continueSearch){
-            if(curBlock == nextBlock)
+        while(checkBlock != null && continueSearch){
+            if(curBlock == checkBlock)
                 continueSearch = false;
             else{
-                prevBlock = nextBlock;
-                nextBlock = nextBlock.nextDistBlock;
+                prevBlock = checkBlock;
+                checkBlock = checkBlock.nextDistBlock;
             }
         }
-        if(nextBlock != null){
+        return prevBlock;
+    }
+    
+    private void removeBlockHere(MapBlock curBlock, MapBlock prevBlock, MapBlock thisBlock)
+    {
+        if(thisBlock != null){
             if(prevBlock != null)
-                prevBlock.nextDistBlock = nextBlock.nextDistBlock;
+                prevBlock.nextDistBlock = thisBlock.nextDistBlock;
             else
-                openBlock = nextBlock.nextDistBlock;
-        }
+                openBlock = thisBlock.nextDistBlock;
+        } 
     }
     
     public void addBlockOpen(MapBlock curBlock)
     {
-        MapBlock prevBlock = null;
-        MapBlock nextBlock = openBlock;
-        boolean continueSearch = true;
-        while(nextBlock != null && continueSearch){
-            if(curBlock.possibleTrip < nextBlock.possibleTrip)
-                continueSearch = false;
-            else{
-                prevBlock = nextBlock;
-                nextBlock = nextBlock.nextDistBlock;
-            }
+        MapBlock prevBlock = searchBlock(curBlock);
+        if(prevBlock == null){
+            curBlock.nextDistBlock = openBlock;
+            openBlock = curBlock;
         }
-        if(prevBlock == null) openBlock = curBlock;
-        else prevBlock.nextDistBlock = curBlock;
-        curBlock.nextDistBlock = nextBlock;
+        else{
+            curBlock.nextDistBlock = prevBlock.nextDistBlock;
+            prevBlock.nextDistBlock = curBlock;
+        }
     }
     
     public void tracePath()
