@@ -35,6 +35,16 @@ public class Questioner {
             getMapInfo();
     }
     
+    public void set(boolean againIn, int heightIn, int widthIn, int forestChanceIn, int mountainChanceIn, int waterChanceIn)
+    {
+        again = againIn;
+        height = heightIn;
+        width = widthIn;
+        forestChance = forestChanceIn;
+        mountainChance = mountainChanceIn;
+        waterChance = waterChanceIn;
+    }
+    
     private void getMapInfo()
     {
         height = getNumberBetween(3, 100, "Enter height (3-100): ");

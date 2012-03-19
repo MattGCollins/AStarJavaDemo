@@ -41,60 +41,36 @@ public class MapBlock {
     public char mapCharacter()
     {
         char returnChar = '+';
-        switch(terrainType)
-        {
-            case TER_PLAINS:
-                returnChar = '.';
-            break;
-            case TER_FOREST:
-                returnChar = '*';
-            break;
-            case TER_MOUNTAINS:
-                returnChar = '^';
-            break;
-            case TER_WATER:
-                returnChar = '~';
-            break;
+        switch(terrainType){
+            case TER_PLAINS: returnChar = '.'; break;
+            case TER_FOREST: returnChar = '*'; break;
+            case TER_MOUNTAINS: returnChar = '^'; break;
+            case TER_WATER: returnChar = '~'; break;
         }
         return returnChar;
+    }
+    
+    public void set(int positionX, int positionY, boolean isPathIn, boolean visitedIn, int terrainTypeIn)
+    {
+        position.x = positionX;
+        position.y = positionY;
+        isPath = isPathIn;
+        visited = visitedIn;
+        terrainType = terrainTypeIn;
     }
     
     public char pathCharacter()
     {
         char returnChar = '+';
-        if(isPath)
-        {
-            switch(pathType)
-            {
-                case PATH_START:
-                    returnChar = '@';
-                break;
-                case PATH_PATH:
-                    returnChar = '#';
-                break;
-                case PATH_END:
-                    returnChar = 'X';
-                break;
+        if(isPath){
+            switch(pathType){
+                case PATH_START: returnChar = '@'; break;
+                case PATH_PATH: returnChar = '#'; break;
+                case PATH_END: returnChar = 'X'; break;
             }
         }
         else
-        {
-            switch(terrainType)
-            {
-                case TER_PLAINS:
-                    returnChar = '.';
-                break;
-                case TER_FOREST:
-                    returnChar = '*';
-                break;
-                case TER_MOUNTAINS:
-                    returnChar = '^';
-                break;
-                case TER_WATER:
-                    returnChar = '~';
-                break;
-            }
-        }
+            returnChar = mapCharacter();
         return returnChar;
     }
 }

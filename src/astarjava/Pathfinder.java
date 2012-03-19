@@ -27,9 +27,8 @@ public class Pathfinder {
     
     public void findPath(Map map)
     {
-        firstBlock = map.blocks[0][0];
-        lastBlock = map.blocks[map.width - 1][map.height - 1];
-        setFirstLastBlocks();
+        setLastBlock(map);
+        setFirstBlock(map);
         MapBlock curBlock;
         do
         {
@@ -39,7 +38,29 @@ public class Pathfinder {
         tracePath();
     }
     
-    public void spreadPath(MapBlock curBlock, Map map)
+    private void setFirstBlock(Map map)
+    {
+        firstBlock = map.blocks[0][0];
+        firstBlock.visited = true;
+        firstBlock.prevPathBlock = null;
+        firstBlock.distance = 0;
+        firstBlock.isPath = true;
+        firstBlock.pathType = MapBlock.PATH_START;
+        Point vectorTo = new Point(firstBlock.position.x - lastBlock.position.x, firstBlock.position.y - lastBlock.position.y);
+        vectorTo.x = Math.abs(vectorTo.x); vectorTo.y = Math.abs(vectorTo.y);
+        firstBlock.possibleTrip = firstBlock.distance + (float)Math.hypot(vectorTo.x, vectorTo.y);
+        addBlockOpen(firstBlock);
+    }
+    
+    private void setLastBlock(Map map)
+    {
+        lastBlock = map.blocks[map.width - 1][map.height - 1];
+        lastBlock.isPath = true;
+        lastBlock.pathType = MapBlock.PATH_END;
+        lastBlock.possibleTrip = lastBlock.position.x * lastBlock.position.y;
+    }
+    
+    private void spreadPath(MapBlock curBlock, Map map)
     {
         openBlock = openBlock.nextDistBlock;
         if(curBlock.position.x == 0)
@@ -103,44 +124,16 @@ public class Pathfinder {
             visitBlock(curBlock, true, map.blocks[curBlock.position.x + 1][curBlock.position.y + 1]);
     }
     
-    public void setFirstLastBlocks()
-    {
-        firstBlock.visited = true;
-        firstBlock.prevPathBlock = null;
-        firstBlock.distance = 0;
-        firstBlock.isPath = true;
-        firstBlock.pathType = MapBlock.PATH_START;
-        Point vectorTo = new Point(firstBlock.position.x - lastBlock.position.x, firstBlock.position.y - lastBlock.position.y);
-        vectorTo.x = Math.abs(vectorTo.x);
-        vectorTo.y = Math.abs(vectorTo.y);
-        float distanceTo = (float)Math.sqrt((vectorTo.x * vectorTo.x) + (vectorTo.y * vectorTo.y));
-        firstBlock.possibleTrip = firstBlock.distance + distanceTo;
-        addBlockOpen(firstBlock);
-        
-        lastBlock.isPath = true;
-        lastBlock.pathType = MapBlock.PATH_END;
-        lastBlock.possibleTrip = lastBlock.position.x * lastBlock.position.y;
-    }
-    
     public void visitBlock(MapBlock prevBlock, boolean diagonal, MapBlock curBlock)
     {
         float distance = (diagonal ? (curBlock.terrainType + prevBlock.terrainType) * diagDist : curBlock.terrainType + prevBlock.terrainType);
         distance = prevBlock.distance + (distance / 2);
-        if(curBlock.visited == false || distance < curBlock.distance)
-        {
+        if(curBlock.visited == false || distance < curBlock.distance){
             curBlock.prevPathBlock = prevBlock;
             curBlock.distance = distance;
-            Point vectorTo = new Point(curBlock.position.x - lastBlock.position.x, curBlock.position.y - lastBlock.position.y);
-            vectorTo.x = Math.abs(vectorTo.x);
-            vectorTo.y = Math.abs(vectorTo.y);
-            float possibleDiagonals = Math.min(vectorTo.x, vectorTo.y);
-            float extraSteps = Math.max(vectorTo.x, vectorTo.y) - possibleDiagonals;
-            float distanceTo = (possibleDiagonals * diagDist) + extraSteps;
-            curBlock.possibleTrip = curBlock.distance + distanceTo;
-            if(curBlock.terrainType != MapBlock.TER_WATER)
-            {
-                if(curBlock.visited == true)
-                {
+            curBlock.possibleTrip = findPossibleTrip(curBlock);
+            if(curBlock.terrainType != MapBlock.TER_WATER){
+                if(curBlock.visited == true){
                     removeBlock(curBlock);
                 }
                 addBlockOpen(curBlock);
@@ -149,23 +142,31 @@ public class Pathfinder {
         }
     }
     
+    private float findPossibleTrip(MapBlock curBlock)
+    {
+        Point vectorTo = new Point(curBlock.position.x - lastBlock.position.x, curBlock.position.y - lastBlock.position.y);
+        vectorTo.x = Math.abs(vectorTo.x);
+        vectorTo.y = Math.abs(vectorTo.y);
+        float possibleDiagonals = Math.min(vectorTo.x, vectorTo.y);
+        float extraSteps = Math.max(vectorTo.x, vectorTo.y) - possibleDiagonals;
+        float distanceTo = (possibleDiagonals * diagDist) + extraSteps;
+        return curBlock.distance + distanceTo;
+    }
+    
     public void removeBlock(MapBlock curBlock)
     {
         MapBlock prevBlock = null;
         MapBlock nextBlock = openBlock;
         boolean continueSearch = true;
-        while(nextBlock != null && continueSearch)
-        {
+        while(nextBlock != null && continueSearch){
             if(curBlock == nextBlock)
                 continueSearch = false;
-            else
-            {
+            else{
                 prevBlock = nextBlock;
                 nextBlock = nextBlock.nextDistBlock;
             }
         }
-        if(nextBlock != null)
-        {
+        if(nextBlock != null){
             if(prevBlock != null)
                 prevBlock.nextDistBlock = nextBlock.nextDistBlock;
             else
@@ -181,8 +182,7 @@ public class Pathfinder {
         while(nextBlock != null && continueSearch){
             if(curBlock.possibleTrip < nextBlock.possibleTrip)
                 continueSearch = false;
-            else
-            {
+            else{
                 prevBlock = nextBlock;
                 nextBlock = nextBlock.nextDistBlock;
             }
@@ -194,16 +194,13 @@ public class Pathfinder {
     
     public void tracePath()
     {
-        if(lastBlock.prevPathBlock == null)
-        {
+        if(lastBlock.prevPathBlock == null){
             System.out.println("No path found.");
         }
-        else
-        {
+        else{
             MapBlock curBlock = lastBlock.prevPathBlock;
 
-            while(curBlock.prevPathBlock != null)
-            {
+            while(curBlock.prevPathBlock != null){
                 curBlock.pathType = MapBlock.PATH_PATH;
                 curBlock.isPath = true;
                 curBlock = curBlock.prevPathBlock;

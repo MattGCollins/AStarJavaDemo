@@ -34,29 +34,25 @@ public class Map {
         {
             for(int y = 0; y < height; ++y)
             {
-                blocks[x][y].terrainType = MapBlock.TER_PLAINS;
-                blocks[x][y].isPath = false;
-                blocks[x][y].visited = false;
-                blocks[x][y].position.setLocation(x, y);
-                Random numGen = new Random();
-                int randomNum = numGen.nextInt(100);
-                
-                if(randomNum < forestChance)
-                {
-                    blocks[x][y].terrainType = MapBlock.TER_FOREST;
-                }
-                else if(randomNum < mountainChance)
-                {
-                    blocks[x][y].terrainType = MapBlock.TER_MOUNTAINS;
-                }
-                else if(randomNum < waterChance)
-                {
-                    blocks[x][y].terrainType = MapBlock.TER_WATER;
-                }
+                setBlock(x, y, forestChance, mountainChance, waterChance);
             }
         }
         blocks[0][0].terrainType = MapBlock.TER_PLAINS;
         blocks[width - 1][height - 1].terrainType = MapBlock.TER_PLAINS;
+    }
+    
+    public void setBlock(int x, int y, int forestChance, int mountainChance, int waterChance)
+    {
+        Random numGen = new Random();
+        int randomNum = numGen.nextInt(100);
+        if(randomNum < forestChance)
+            blocks[x][y].set(x, y, false, false, MapBlock.TER_FOREST);
+        else if(randomNum < mountainChance)
+            blocks[x][y].set(x, y, false, false, MapBlock.TER_MOUNTAINS);
+        else if(randomNum < waterChance)
+            blocks[x][y].set(x, y, false, false, MapBlock.TER_WATER);
+        else
+            blocks[x][y].set(x, y, false, false, MapBlock.TER_PLAINS);
     }
     
     public void renderMap()
